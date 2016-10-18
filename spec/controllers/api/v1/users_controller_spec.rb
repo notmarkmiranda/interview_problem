@@ -20,6 +20,14 @@ describe Api::V1::UsersController do
     expect(user["id"]).to eq(user1.id)
   end
 
+  it "GET#show - sad path" do
+    user = User.last
+    get :show, id: user.id + 1, format: :json
+    user = JSON.parse(response.body)
+    expect(response.status).to eq(404)
+    expect(user["message"]).to eq("no user")
+  end
+
   it "POST#create" do
     params = { first_name: "a",
       last_name: "b",
@@ -31,5 +39,16 @@ describe Api::V1::UsersController do
     user = User.last
     expect(response).to be_success
     expect(json_response["id"]).to eq(user.id)
+  end
+
+  it "POST#create" do
+    params = { first_name: "a",
+      email: "a@b.com",
+      social_security_number: "576173854"
+    }
+    post :create, user: params, format: :json
+    json_response = JSON.parse(response.body)
+    expect(response.status).to eq(400)
+    expect(json_response["message"]).to eq("Last name can't be blank")
   end
 end
